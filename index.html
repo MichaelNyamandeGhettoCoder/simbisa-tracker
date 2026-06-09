@@ -2,9 +2,9 @@
 <html>
 <head>
     <title>Caramel Cloud Kitchen & Cosmetics</title>
-<meta name="robots" content="noindex, nofollow">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; transition: padding-bottom 0.3s; }
@@ -22,7 +22,7 @@
        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
        .product-grid.single { grid-template-columns: 1fr; }
        .product-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-       .product-card img { width: 100%; height: 160px; object-fit: cover; }
+       .product-card img { width: 100%; height: 160px; object-fit: cover; cursor: zoom-in; }
        .product-grid.single .product-card img { height: 220px; }
        .product-info { padding: 12px; text-align: center; }
        .product-name { font-weight: 600; margin-bottom: 4px; font-size: 15px; }
@@ -91,9 +91,11 @@
         </div>
     </div>
 
+<script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
 <script>
     const WHATSAPP_NUMBER = "263717236434";
     let cart = JSON.parse(localStorage.getItem('caramel_cart') || '[]');
+    let lightbox;
 
     function openNav() { document.getElementById("sideNav").style.width = "250px"; }
     function closeNav() { document.getElementById("sideNav").style.width = "0"; }
@@ -173,7 +175,7 @@
         let address = document.getElementById('customer-address').value.trim();
         if (!name ||!address) return alert('Please enter your name and address');
 
-        let message = `Hi Caramel Cloud! New Order:\n\n`;
+        let message = `*Hi Caramel Cloud! New Order:\n\n*`;
         let total = 0;
         cart.forEach(item => {
             message += `• ${item.qty}x ${item.name} - $${(item.price * item.qty).toFixed(2)}\n`;
@@ -207,7 +209,9 @@
                 <div class="${gridClass}">
                     ${catProducts.map(p => `
                         <div class="product-card">
-                            <img src="${p.image}" alt="${p.name}">
+                            <a href="${p.image}" class="glightbox" data-gallery="products" data-title="${p.name}">
+                                <img src="${p.image}" alt="${p.name}">
+                            </a>
                             <div class="product-info">
                                 <div class="product-name">${p.name}</div>
                                 <div class="product-price">$${p.price}</div>
@@ -218,6 +222,29 @@
                 </div>
             `;
         }).join('');
+        
+        // Initialize lightbox after products load
+        initLightbox();
+    }
+    
+    function initLightbox() {
+        if (lightbox) lightbox.destroy();
+        lightbox = GLightbox({
+            selector: '.glightbox',
+            touchNavigation: true,
+            loop: true,
+            zoomable: true,
+            openEffect: 'zoom',
+            closeEffect: 'fade'
+        });
+        
+        // Double-click to open
+        document.querySelectorAll('.product-card img').forEach(img => {
+            img.ondblclick = (e) => {
+                e.preventDefault();
+                img.parentElement.click();
+            };
+        });
     }
 
     window.onclick = function(event) {

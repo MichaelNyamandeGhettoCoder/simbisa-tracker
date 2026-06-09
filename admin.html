@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Caramel Cloud Admin - Add Product</title>
+  <title>Caramel Cloud Admin</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
@@ -24,19 +24,13 @@
       </div>
 
       <div>
-        <label class="block text-sm font-medium mb-1">Description</label>
-        <textarea name="description" rows="3" class="w-full border rounded px-3 py-2"></textarea>
-      </div>
-
-      <div>
         <label class="block text-sm font-medium mb-1">Product Photos</label>
-        <input type="file" id="imageInput" name="images" multiple accept="image/*"
+        <input type="file" id="imageInput" multiple accept="image/*"
                class="block w-full text-sm border rounded file:mr-4 file:py-2 file:px-4 
                       file:rounded file:border-0 file:bg-blue-50 file:text-blue-700 cursor-pointer">
-        <p class="text-xs text-gray-500 mt-1">Select front, back, side views. Double-click any preview to zoom.</p>
+        <p class="text-xs text-gray-500 mt-1">Select 1 or more. Double-click any preview to zoom.</p>
       </div>
 
-      <!-- This is where previews show up -->
       <div id="previewGrid" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
 
       <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded">
@@ -46,66 +40,87 @@
   </div>
 
 <script>
-// This script handles multiple upload + preview + zoom/swipe
-const imageInput = document.getElementById('imageInput');
-const previewGrid = document.getElementById('previewGrid');
+let allSelectedFiles = [];
 let lightbox;
 
-imageInput.addEventListener('change', (e) => {
-  previewGrid.innerHTML = '';
-  const files = Array.from(e.target.files);
+document.getElementById('imageInput').addEventListener('change', function(e) {
+  // Works even if e.target.files.length === 1
+  if (this.files && this.files.length > 0) {
+    const newFiles = Array.from(this.files);
+    allSelectedFiles.push(...newFiles);
+    this.value = ''; // Reset so you can add more later
+    updatePreview();
+  }
+});
+
+function updatePreview() {
+  const grid = document.getElementById('previewGrid');
+  grid.innerHTML = '';
   
-  files.forEach((file, idx) => {
+  // This runs even for 1 file
+  allSelectedFiles.forEach((file, idx) => {
     const url = URL.createObjectURL(file);
     
-    const link = document.createElement('a');
-    link.href = url;
-    link.className = 'glightbox';
-    link.setAttribute('data-gallery', 'product');
+    const div = document.createElement('div');
+    div.className = 'relative group';
     
-    const img = document.createElement('img');
-    img.src = url;
-    img.className = 'w-full h-32 object-cover rounded cursor-zoom-in hover:opacity-80 border';
-    img.alt = `Product image ${idx + 1}`;
+    div.innerHTML = `
+      <a href="${url}" class="glightbox" data-gallery="product">
+        <img src="${url}" class="w-full h-32 object-cover rounded border cursor-zoom-in hover:opacity-80" alt="Photo ${idx + 1}">
+      </a>
+      <button type="button" onclick="removePhoto(${idx})" 
+              class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs opacity-0 group-hover:opacity-100">
+        ✕
+      </button>
+    `;
     
-    img.addEventListener('dblclick', () => link.click());
-    
-    link.appendChild(img);
-    previewGrid.appendChild(link);
+    grid.appendChild(div);
   });
   
+  // Init lightbox even for 1 image
   if (lightbox) lightbox.destroy();
   lightbox = GLightbox({
     selector: '.glightbox',
     touchNavigation: true,
-    loop: true,
+    loop: allSelectedFiles.length > 1, // Only loop if 2+ photos
     zoomable: true,
-    openEffect: 'zoom',
-    closeEffect: 'fade'
+    draggable: true
   });
-});
-
-document.getElementById('productForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const formData = new FormData(e.target);
   
-  // TODO: Replace /api/products with your real endpoint
-  console.log('Uploading', imageInput.files.length, 'images');
+  // Make double-click work on images
+  document.querySelectorAll('#previewGrid img').forEach(img => {
+    img.ondblclick = (e) => {
+      e.preventDefault();
+      img.parentElement.click();
+    };
+  });
+}
+
+function removePhoto(index) {
+  allSelectedFiles.splice(index, 1);
+  updatePreview();
+}
+
+document.getElementById('productForm').onsubmit = async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  
+  // Remove the empty file input, use our array instead
+  fd.delete('images');
+  allSelectedFiles.forEach(file => fd.append('images', file));
+  
+  console.log('Saving product with', allSelectedFiles.length, 'photos');
   
   try {
-    const res = await fetch('/api/products', {
-      method: 'POST',
-      body: formData
-    });
-    if (res.ok) {
-      alert('Product saved!');
-      e.target.reset();
-      previewGrid.innerHTML = '';
-    }
+    await fetch('/api/products', { method: 'POST', body: fd });
+    alert('Saved!');
+    allSelectedFiles = [];
+    e.target.reset();
+    updatePreview();
   } catch (err) {
-    alert('Demo: Product data ready. Connect your /api/products endpoint to save.');
+    alert(`Demo: Ready to save ${allSelectedFiles.length} photo(s)`);
   }
-});
+};
 </script>
 </body>
 </html>
