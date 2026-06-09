@@ -7,44 +7,84 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Pink file button */
+    input[type="file"]::file-selector-button {
+      background: #d63384;
+      color: white;
+      border: 0;
+      padding: 10px 20px;
+      border-radius: 8px;
+      margin-right: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(214, 51, 132, 0.3);
+    }
+    input[type="file"]::file-selector-button:hover {
+      background: #b02a5b;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(214, 51, 132, 0.4);
+    }
+  </style>
 </head>
-<body class="bg-gray-50 p-4 md:p-6">
-  <div class="max-w-4xl mx-auto">
-    <h1 class="text-2xl font-bold mb-6">Add New Product</h1>
-
-    <form id="productForm" class="bg-white p-6 rounded-lg shadow space-y-5">
-      <div>
-        <label class="block text-sm font-medium mb-1">Category</label>
-        <select name="category" required class="w-full border rounded px-3 py-2">
-          <option value="Cakes">Cakes</option>
-          <option value="Cosmetics">Cosmetics</option>
-        </select>
+<body class="p-4">
+  <div class="w-full max-w-lg">
+    <div class="bg-white rounded-2xl shadow-xl p-8 border border-pink-100">
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Add New Product</h1>
+        <p class="text-sm text-gray-500">Fill in details and upload photos</p>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium mb-1">Product Name</label>
-        <input type="text" name="name" required class="w-full border rounded px-3 py-2">
-      </div>
+      <form id="productForm" class="space-y-6">
+        <!-- 1. Product Name - TOP -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Product Name</label>
+          <input type="text" name="name" required placeholder="e.g. Chocolate Fudge Cake"
+                 class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-[#d63384] focus:ring-2 focus:ring-pink-100 outline-none transition placeholder:text-gray-400">
+        </div>
 
-      <div>
-        <label class="block text-sm font-medium mb-1">Price USD</label>
-        <input type="number" name="price" step="0.01" required class="w-full border rounded px-3 py-2">
-      </div>
+        <!-- 2. Price - SECOND -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Price USD</label>
+          <input type="number" name="price" step="0.01" required placeholder="e.g. 25.99"
+                 class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-[#d63384] focus:ring-2 focus:ring-pink-100 outline-none transition placeholder:text-gray-400">
+        </div>
 
-      <div>
-        <label class="block text-sm font-medium mb-1">Product Photos</label>
-        <input type="file" id="imageInput" multiple accept="image/*"
-               class="block w-full text-sm border rounded file:mr-4 file:py-2 file:px-4
-                      file:rounded file:border-0 file:bg-blue-50 file:text-blue-700 cursor-pointer">
-        <p class="text-xs text-gray-500 mt-1">Select 1 or more. Front, back, side views. Double-click preview to zoom.</p>
-      </div>
+        <!-- 3. Category - CENTERED -->
+        <div class="text-center">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+          <select name="category" required
+                  class="w-full md:w-2/3 mx-auto border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-[#d63384] focus:ring-2 focus:ring-pink-100 outline-none transition">
+            <option value="Cakes">🎂 Cakes</option>
+            <option value="Cosmetics">💄 Cosmetics</option>
+          </select>
+        </div>
 
-      <div id="previewGrid" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+        <!-- 4. Photos - STAYS AT BOTTOM -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Product Photos</label>
+          <input type="file" id="imageInput" multiple accept="image/*"
+                 class="block w-full text-sm border-2 border-gray-200 rounded-xl cursor-pointer file:mr-4">
+          <p class="text-xs text-gray-500 mt-2">Select multiple: front, back, side views. Double-click preview to zoom.</p>
+        </div>
 
-      <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded">
-        Save Product
-      </button>
-    </form>
+        <div id="previewGrid" class="grid grid-cols-3 md:grid-cols-4 gap-3"></div>
+
+        <!-- Appealing Button -->
+        <button type="submit"
+                class="w-full bg-gradient-to-r from-[#d63384] to-[#c02a73] hover:from-[#b02a5b] hover:to-[#a02550] text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
+          ✨ Save Product
+        </button>
+      </form>
+    </div>
   </div>
 
 <script>
@@ -69,10 +109,10 @@ function updatePreview() {
     div.className = 'relative group';
     div.innerHTML = `
       <a href="${url}" class="glightbox" data-gallery="admin-preview">
-        <img src="${url}" class="w-full h-32 object-cover rounded border cursor-zoom-in hover:opacity-80" alt="Photo ${idx + 1}">
+        <img src="${url}" class="w-full h-24 object-cover rounded-lg border-2 border-gray-200 cursor-zoom-in hover:border-[#d63384] transition" alt="Photo ${idx + 1}">
       </a>
       <button type="button" onclick="removePhoto(${idx})"
-              class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs opacity-0 group-hover:opacity-100">
+              class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-7 h-7 text-sm opacity-0 group-hover:opacity-100 transition shadow-lg">
         ✕
       </button>
     `;
@@ -96,7 +136,6 @@ document.getElementById('productForm').onsubmit = async (e) => {
   e.preventDefault();
   const form = e.target;
 
-  // Convert all files to base64 for localStorage
   const imagePromises = allSelectedFiles.map(file => {
     return new Promise(resolve => {
       const reader = new FileReader();
@@ -111,15 +150,15 @@ document.getElementById('productForm').onsubmit = async (e) => {
     name: form.name.value,
     price: parseFloat(form.price.value),
     category: form.category.value,
-    images: images, // Array of all photos
-    image: images[0] // First photo as main thumbnail
+    images: images,
+    image: images[0]
   };
 
   let products = JSON.parse(localStorage.getItem('caramel_products') || '[]');
   products.push(product);
   localStorage.setItem('caramel_products', JSON.stringify(products));
 
-  alert(`Saved ${product.name} with ${images.length} photo(s)!`);
+  alert(`✅ Saved ${product.name} with ${images.length} photo(s)!`);
   allSelectedFiles = [];
   form.reset();
   updatePreview();
@@ -127,3 +166,4 @@ document.getElementById('productForm').onsubmit = async (e) => {
 </script>
 </body>
 </html>
+
