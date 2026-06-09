@@ -128,7 +128,7 @@
 <script>
     // CONFIG - REPLACE THESE
     const ADMIN_PIN = "1234"; // Change this
-    const IMGBB_API_KEY = "123fe4e015517b8deee68bae9212db71"; // Get from https://api.imgbb.com/
+    const IMGBB_API_KEY = "77d798c6f2d4eae9e31b26fefe4f4ceb"; // Get from https://api.imgbb.com/
     const WHATSAPP_NUMBER = "263717236434"; // Your real number
 
     let products = JSON.parse(localStorage.getItem('caramel_products') || '[]');
@@ -212,7 +212,7 @@
         const hasNewImages = currentFiles.length > 0;
 
         if (!isEditing &&!hasNewImages) return alert('Add at least one image');
-        if (IMGBB_API_KEY === "123fe4e015517b8deee68bae9212db71") return alert('Set your ImgBB API key first');
+        if (IMGBB_API_KEY === "77d798c6f2d4eae9e31b26fefe4f4ceb") return alert('Set your ImgBB API key first');
 
         document.getElementById('save-btn').disabled = true;
         document.getElementById('upload-status').innerText = 'Uploading images to ImgBB...';
