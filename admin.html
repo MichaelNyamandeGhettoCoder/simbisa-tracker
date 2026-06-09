@@ -15,7 +15,6 @@
       align-items: center;
       justify-content: center;
     }
-    /* Pink file button */
     input[type="file"]::file-selector-button {
       background: #d63384;
       color: white;
@@ -33,32 +32,71 @@
       transform: translateY(-1px);
       box-shadow: 0 4px 8px rgba(214, 51, 132, 0.4);
     }
+   .shake {
+      animation: shake 0.5s;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
   </style>
 </head>
 <body class="p-4">
-  <div class="w-full max-w-lg">
+  <!-- LOGIN SCREEN -->
+  <div id="loginScreen" class="w-full max-w-md">
     <div class="bg-white rounded-2xl shadow-xl p-8 border border-pink-100">
       <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">Add New Product</h1>
-        <p class="text-sm text-gray-500">Fill in details and upload photos</p>
+        <div class="text-5xl mb-4">🔒</div>
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Admin Access</h1>
+        <p class="text-sm text-gray-500">Enter password to continue</p>
+      </div>
+
+      <form id="loginForm" class="space-y-6">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+          <input type="password" id="passwordInput" required
+                 class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-[#d63384] focus:ring-2 focus:ring-pink-100 outline-none transition"
+                 placeholder="••••••••">
+          <p id="loginError" class="text-red-500 text-sm mt-2 hidden">Wrong password. Try again.</p>
+        </div>
+
+        <button type="submit"
+                class="w-full bg-gradient-to-r from-[#d63384] to-[#c02a73] hover:from-[#b02a5b] hover:to-[#a02550] text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
+          🔓 Unlock Admin
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADMIN PANEL - HIDDEN UNTIL LOGIN -->
+  <div id="adminPanel" class="w-full max-w-lg hidden">
+    <div class="bg-white rounded-2xl shadow-xl p-8 border border-pink-100">
+      <div class="flex justify-between items-center mb-8">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-800 mb-2">Add New Product</h1>
+          <p class="text-sm text-gray-500">Fill in details and upload photos</p>
+        </div>
+        <button onclick="logout()" class="text-gray-400 hover:text-red-500 transition" title="Logout">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+          </svg>
+        </button>
       </div>
 
       <form id="productForm" class="space-y-6">
-        <!-- 1. Product Name - TOP -->
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-2">Product Name</label>
           <input type="text" name="name" required placeholder="e.g. Chocolate Fudge Cake"
                  class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-[#d63384] focus:ring-2 focus:ring-pink-100 outline-none transition placeholder:text-gray-400">
         </div>
 
-        <!-- 2. Price - SECOND -->
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-2">Price USD</label>
           <input type="number" name="price" step="0.01" required placeholder="e.g. 25.99"
                  class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-[#d63384] focus:ring-2 focus:ring-pink-100 outline-none transition placeholder:text-gray-400">
         </div>
 
-        <!-- 3. Category - NOW LEFT ALIGNED LIKE OTHERS -->
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-2">Category</label>
           <select name="category" required
@@ -68,7 +106,6 @@
           </select>
         </div>
 
-        <!-- 4. Photos - STAYS AT BOTTOM -->
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-2">Product Photos</label>
           <input type="file" id="imageInput" multiple accept="image/*"
@@ -78,7 +115,6 @@
 
         <div id="previewGrid" class="grid grid-cols-3 md:grid-cols-4 gap-3"></div>
 
-        <!-- Appealing Button -->
         <button type="submit"
                 class="w-full bg-gradient-to-r from-[#d63384] to-[#c02a73] hover:from-[#b02a5b] hover:to-[#a02550] text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
           ✨ Save Product
@@ -88,6 +124,42 @@
   </div>
 
 <script>
+// CHANGE THIS PASSWORD
+const ADMIN_PASSWORD = "caramel2026";
+
+// Check if already logged in this session
+if (sessionStorage.getItem('adminAuth') === 'true') {
+  showAdminPanel();
+}
+
+document.getElementById('loginForm').onsubmit = (e) => {
+  e.preventDefault();
+  const password = document.getElementById('passwordInput').value;
+  const errorMsg = document.getElementById('loginError');
+  const loginBox = document.getElementById('loginScreen');
+
+  if (password === ADMIN_PASSWORD) {
+    sessionStorage.setItem('adminAuth', 'true');
+    showAdminPanel();
+  } else {
+    errorMsg.classList.remove('hidden');
+    loginBox.classList.add('shake');
+    setTimeout(() => loginBox.classList.remove('shake'), 500);
+    document.getElementById('passwordInput').value = '';
+  }
+};
+
+function showAdminPanel() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('adminPanel').classList.remove('hidden');
+}
+
+function logout() {
+  sessionStorage.removeItem('adminAuth');
+  location.reload();
+}
+
+// PRODUCT FORM LOGIC
 let allSelectedFiles = [];
 let lightbox;
 
@@ -166,19 +238,3 @@ document.getElementById('productForm').onsubmit = async (e) => {
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
